@@ -27,6 +27,7 @@ public class HelloApplication extends Application {
             ClientConnection clientConnection = new ClientConnection("localhost", 5000);
             clientConnection.start();
             LoginViewController.setClientConnection(clientConnection);
+            ChatViewController.setClientConnection(clientConnection);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -19,7 +19,6 @@ public class LoginViewController {
             messageLabel.setText("Please enter another login");
         }
     }
-
     public static void setClientConnection(ClientConnection clientConnection) {
         client = clientConnection;
     }

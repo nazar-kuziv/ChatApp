@@ -2,6 +2,10 @@ package com.example.chatapp;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class ClientConnection extends Thread {
@@ -10,9 +14,13 @@ public class ClientConnection extends Thread {
     private final BufferedReader reader;
     private boolean isLogined = false;
     private boolean wasLoginChecked = false;
+    private boolean isUpdatingUserListNecessary = true;
+    private boolean wasUserListUpdated = false;
     private final String youGetFileKey = "Vj1l7FY^7^6$pUQ^NDWw";
     private final String successfulLoginKey = "^yus764y1kcy1l72T5xU";
     private final String failedLoginKey = "%363D5F7GH*CICkaDxp@";
+    private final String listOfUsersOnlineKey = "KE6aG20#N*k1M3Y5m!X1";
+    private String listOfUsersOnline = "";
     public ClientConnection(String address, int port) throws IOException {
         socket = new Socket(address, port);
         InputStream input = socket.getInputStream();
@@ -33,15 +41,20 @@ public class ClientConnection extends Thread {
                 } else if (message.equals(failedLoginKey)) {
                     isLogined = false;
                     wasLoginChecked = true;
-                } else if (isThisMessageWithFile(message)) {
+                } else if(hasNewUserConnected(message)){
+                    isUpdatingUserListNecessary = true;
+                }else if (isThisMessageWithFile(message)) {
                     sendFileToServer(message);
                 } else if (message.startsWith("YouGetFile" + youGetFileKey)) {
                     receiveFileFromServer(dataInputStream, message);
-                } else {
-                    System.out.println(message);
+                } else if(message.startsWith(listOfUsersOnlineKey)){
+                    listOfUsersOnline = message;
+                    wasUserListUpdated = true;
+                }else {
+                        System.out.println(message);
+                    }
                 }
-            }
-        } catch (IOException e) {
+            }catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -127,5 +140,36 @@ public class ClientConnection extends Thread {
         }
         wasLoginChecked = false;
         return isLogined;
+    }
+    private boolean hasNewUserConnected(String message) {
+        System.out.println(message);
+        String pattern = "(?i)User\\s+\\w+\\s+joined\\s+the\\s+chat!";
+        Pattern regexPattern = Pattern.compile(pattern);
+        Matcher matcher = regexPattern.matcher(message);
+        return matcher.find();
+    }
+    protected boolean isUpdatingUserListNecessary() {
+        return isUpdatingUserListNecessary;
+    }
+    protected void userListHasBeenUpdated() {
+        this.isUpdatingUserListNecessary = false;
+    }
+
+    public List<String> getUsersLogins() {
+        writer.println("/online");
+        while (!wasUserListUpdated) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        wasUserListUpdated = false;
+        if(listOfUsersOnline.equals(listOfUsersOnlineKey)){
+            return Collections.singletonList("");
+        }else{
+            String[] users = listOfUsersOnline.substring(21).split(" ");
+            return List.of(users);
+        }
     }
 }
