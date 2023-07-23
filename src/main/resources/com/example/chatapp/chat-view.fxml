@@ -14,7 +14,7 @@
     <bottom>
         <HBox spacing="10.0" alignment="CENTER_LEFT">
             <TextField fx:id="messageTextField" HBox.hgrow="ALWAYS" />
-            <Button text="Send"/>
+            <Button text="Send" onAction="#sendMessage"/>
             <Button text="Send File"/>
         </HBox>
     </bottom>

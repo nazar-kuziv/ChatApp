@@ -18,6 +18,15 @@ public class ChatViewController {
     private TextField messageTextField;
     @FXML
     private ListView<String> participantsListView;
+    @FXML
+    private void sendMessage() {
+        String message = messageTextField.getText();
+        if (!message.isEmpty()) {
+            client.sendMessage(message);
+            chatTextArea.appendText("- " + message + "\n");
+            messageTextField.clear();
+        }
+    }
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     public static void setClientConnection(ClientConnection clientConnection) {
         client = clientConnection;
