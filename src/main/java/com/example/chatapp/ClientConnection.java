@@ -36,7 +36,8 @@ public class ClientConnection extends Thread {
                     loginViewController.successfulLogin();
                 } else if (message.equals(failedLoginKey)) {
                     loginViewController.failedLogin();
-                } else if(hasNewUserConnected(message)){
+                } else if(hasNewUserConnected(message) || hasUserDisconnected(message)){
+                    chatViewController.addNewMessageIntoTextArea(message);
                     writer.println("/online");
                     chatViewController.updateParticipantList(getUsersLogins(reader.readLine()));
                 }else if (isThisMessageWithFile(message)) {
@@ -129,6 +130,12 @@ public class ClientConnection extends Thread {
     }
     private boolean hasNewUserConnected(String message) {
         String pattern = "(?i)User\\s+\\w+\\s+joined\\s+the\\s+chat!";
+        Pattern regexPattern = Pattern.compile(pattern);
+        Matcher matcher = regexPattern.matcher(message);
+        return matcher.find();
+    }
+    private boolean hasUserDisconnected(String message) {
+        String pattern = "(?i)User\\s+\\w+\\s+left\\s+the\\s+chat!";
         Pattern regexPattern = Pattern.compile(pattern);
         Matcher matcher = regexPattern.matcher(message);
         return matcher.find();
