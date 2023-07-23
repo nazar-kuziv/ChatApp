@@ -15,10 +15,10 @@ public class LoginViewController {
     private void loginIntoChat() {
         client.sendMessage(loginTextField.getText());
     }
-    protected void successfulLogin(){
+    public void successfulLogin(){
         Platform.runLater(HelloApplication::changeSceneAfterLogging);
     }
-    protected void failedLogin(){
+    public void failedLogin(){
         Platform.runLater(() -> messageLabel.setText("Please enter another login"));
     }
     public static void setClientConnection(ClientConnection clientConnection) {

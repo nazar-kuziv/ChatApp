@@ -32,7 +32,7 @@ public class ChatViewController {
     public static void setClientConnection(ClientConnection clientConnection) {
         client = clientConnection;
     }
-    protected void updateParticipantList(List<String> usersLogins) {
+    public void updateParticipantList(List<String> usersLogins) {
         Platform.runLater(() -> {
             participantsListView.getItems().clear();
             participantsListView.getItems().addAll(usersLogins);

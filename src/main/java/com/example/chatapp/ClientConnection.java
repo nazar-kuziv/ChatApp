@@ -31,7 +31,7 @@ public class ClientConnection extends Thread {
         try {
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             String message;
-            while ((message = reader.readLine()) != null) {
+            while ((!socket.isClosed()) && (message = reader.readLine()) != null) {
                 if(message.equals(successfulLoginKey)){
                     loginViewController.successfulLogin();
                 } else if (message.equals(failedLoginKey)) {
@@ -50,7 +50,9 @@ public class ClientConnection extends Thread {
                 }
             }
         }catch (IOException e) {
-            throw new RuntimeException(e);
+            if (!socket.isClosed()) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -158,5 +160,14 @@ public class ClientConnection extends Thread {
         };
         Thread updateThread = new Thread(waitingToControllerConfiguration);
         updateThread.start();
+    }
+    public void disconnect() {
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

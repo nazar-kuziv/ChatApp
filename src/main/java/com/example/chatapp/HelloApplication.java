@@ -19,6 +19,10 @@ public class HelloApplication extends Application {
         stage.setTitle("Login screen");
         stage.setScene(loginScene);
         clientConnection.setLoginViewController(login_fxmlLoader.getController());
+        primaryStage.setOnCloseRequest(event -> {
+            clientConnection.disconnect();
+            System.exit(0);
+        });
         stage.show();
     }
 
