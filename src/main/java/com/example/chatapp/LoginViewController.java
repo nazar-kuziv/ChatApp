@@ -1,5 +1,6 @@
 package com.example.chatapp;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -11,13 +12,14 @@ public class LoginViewController {
     @FXML
     private Label messageLabel;
     @FXML
-    protected void loginIntoChat() {
+    private void loginIntoChat() {
         client.sendMessage(loginTextField.getText());
-        if(client.getIsLogined()){
-            HelloApplication.changeSceneAfterLogging();
-        } else {
-            messageLabel.setText("Please enter another login");
-        }
+    }
+    protected void successfulLogin(){
+        Platform.runLater(HelloApplication::changeSceneAfterLogging);
+    }
+    protected void failedLogin(){
+        Platform.runLater(() -> messageLabel.setText("Please enter another login"));
     }
     public static void setClientConnection(ClientConnection clientConnection) {
         client = clientConnection;

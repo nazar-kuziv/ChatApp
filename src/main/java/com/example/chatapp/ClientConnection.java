@@ -12,15 +12,12 @@ public class ClientConnection extends Thread {
     private final Socket socket;
     private final PrintWriter writer;
     private final BufferedReader reader;
-    private boolean isLogined = false;
-    private boolean wasLoginChecked = false;
-    private boolean isUpdatingUserListNecessary = true;
-    private boolean wasUserListUpdated = false;
     private final String youGetFileKey = "Vj1l7FY^7^6$pUQ^NDWw";
     private final String successfulLoginKey = "^yus764y1kcy1l72T5xU";
     private final String failedLoginKey = "%363D5F7GH*CICkaDxp@";
     private final String listOfUsersOnlineKey = "KE6aG20#N*k1M3Y5m!X1";
-    private String listOfUsersOnline = "";
+    private ChatViewController chatViewController;
+    private LoginViewController loginViewController;
     public ClientConnection(String address, int port) throws IOException {
         socket = new Socket(address, port);
         InputStream input = socket.getInputStream();
@@ -36,25 +33,23 @@ public class ClientConnection extends Thread {
             String message;
             while ((message = reader.readLine()) != null) {
                 if(message.equals(successfulLoginKey)){
-                    isLogined = true;
-                    wasLoginChecked = true;
+                    loginViewController.successfulLogin();
                 } else if (message.equals(failedLoginKey)) {
-                    isLogined = false;
-                    wasLoginChecked = true;
+                    loginViewController.failedLogin();
                 } else if(hasNewUserConnected(message)){
-                    isUpdatingUserListNecessary = true;
+                    writer.println("/online");
+                    chatViewController.updateParticipantList(getUsersLogins(reader.readLine()));
                 }else if (isThisMessageWithFile(message)) {
                     sendFileToServer(message);
                 } else if (message.startsWith("YouGetFile" + youGetFileKey)) {
                     receiveFileFromServer(dataInputStream, message);
                 } else if(message.startsWith(listOfUsersOnlineKey)){
-                    listOfUsersOnline = message;
-                    wasUserListUpdated = true;
-                }else {
-                        System.out.println(message);
-                    }
+                    chatViewController.updateParticipantList(getUsersLogins(message));
+                }else{
+                    chatViewController.addNewMessageIntoTextArea(message);
                 }
-            }catch (IOException e) {
+            }
+        }catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -130,46 +125,38 @@ public class ClientConnection extends Thread {
     private boolean isThisMessageWithFile(String message) {
         return message.startsWith("/file");
     }
-    protected boolean getIsLogined(){
-        while (!wasLoginChecked) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        wasLoginChecked = false;
-        return isLogined;
-    }
     private boolean hasNewUserConnected(String message) {
-        System.out.println(message);
         String pattern = "(?i)User\\s+\\w+\\s+joined\\s+the\\s+chat!";
         Pattern regexPattern = Pattern.compile(pattern);
         Matcher matcher = regexPattern.matcher(message);
         return matcher.find();
     }
-    protected boolean isUpdatingUserListNecessary() {
-        return isUpdatingUserListNecessary;
-    }
-    protected void userListHasBeenUpdated() {
-        this.isUpdatingUserListNecessary = false;
-    }
-
-    public List<String> getUsersLogins() {
-        writer.println("/online");
-        while (!wasUserListUpdated) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        wasUserListUpdated = false;
-        if(listOfUsersOnline.equals(listOfUsersOnlineKey)){
+    public List<String> getUsersLogins(String message) {
+        if(message.equals(listOfUsersOnlineKey)){
             return Collections.singletonList("");
         }else{
-            String[] users = listOfUsersOnline.substring(21).split(" ");
+            String[] users = message.substring(21).split(" ");
             return List.of(users);
         }
+    }
+    public void setChatViewController(ChatViewController chatViewController) {
+        this.chatViewController = chatViewController;
+    }
+    public void setLoginViewController(LoginViewController loginViewController) {
+        this.loginViewController = loginViewController;
+    }
+    public void updateListOfUsersOnline() {
+        Runnable waitingToControllerConfiguration = () -> {
+            while (chatViewController == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            writer.println("/online");
+        };
+        Thread updateThread = new Thread(waitingToControllerConfiguration);
+        updateThread.start();
     }
 }

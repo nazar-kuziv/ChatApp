@@ -6,9 +6,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 public class ChatViewController {
     static ClientConnection client;
@@ -27,23 +25,20 @@ public class ChatViewController {
             messageTextField.clear();
         }
     }
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    @FXML
+    private void initialize() {
+        client.updateListOfUsersOnline();
+    }
     public static void setClientConnection(ClientConnection clientConnection) {
         client = clientConnection;
     }
-    public void initialize() {
-        executorService.scheduleAtFixedRate(this::checkForUserListUpdate, 0, 1, TimeUnit.SECONDS);
-    }
-    private void checkForUserListUpdate() {
-        if (client.isUpdatingUserListNecessary()) {
-            updateParticipantList();
-        }
-    }
-    private void updateParticipantList() {
+    protected void updateParticipantList(List<String> usersLogins) {
         Platform.runLater(() -> {
             participantsListView.getItems().clear();
-            participantsListView.getItems().addAll(client.getUsersLogins());
+            participantsListView.getItems().addAll(usersLogins);
         });
-        client.userListHasBeenUpdated();
+    }
+    public void addNewMessageIntoTextArea(String message) {
+        chatTextArea.appendText(message + "\n");
     }
 }

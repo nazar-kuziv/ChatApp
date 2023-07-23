@@ -8,9 +8,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class HelloApplication extends Application {
-
     private static Stage stage;
-
+    private static ClientConnection clientConnection;
     @Override
     public void start(Stage primaryStage) throws IOException {
         stage = primaryStage;
@@ -19,12 +18,13 @@ public class HelloApplication extends Application {
         stage.setResizable(false);
         stage.setTitle("Login screen");
         stage.setScene(loginScene);
+        clientConnection.setLoginViewController(login_fxmlLoader.getController());
         stage.show();
     }
 
     public static void main(String[] args) {
         try {
-            ClientConnection clientConnection = new ClientConnection("localhost", 5000);
+            clientConnection = new ClientConnection("localhost", 5000);
             clientConnection.start();
             LoginViewController.setClientConnection(clientConnection);
             ChatViewController.setClientConnection(clientConnection);
@@ -40,6 +40,7 @@ public class HelloApplication extends Application {
             Scene chatScene = new Scene(chat_fxmlLoader.load(), 800, 600);
             stage.setResizable(false);
             stage.setTitle("Chat App");
+            clientConnection.setChatViewController(chat_fxmlLoader.getController());
             stage.setScene(chatScene);
         } catch (IOException e) {
             throw new RuntimeException(e);
