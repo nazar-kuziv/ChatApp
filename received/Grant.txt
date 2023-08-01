@@ -1,0 +1,8 @@
+Algebra liniowa z geometrią : 4.5
+Logika i teoria mnogości : 5
+Podstawy programowania : 5
+---------------------------------------------------------------
+Systemy operacyjne : 5
+Bazy danych i zarządzanie informacją : 4.5
+Matematyka dyskretna : 5
+Analiza matematyczna : 4.5

@@ -99,7 +99,8 @@ public class ClientConnection extends Thread {
             String fileName = file.getName();
             FileOutputStream fileOutputStream = new FileOutputStream(folderPath + fileName);
             String sFileSize = dataInputStream.readLine();
-            System.out.println("Receiving file size: " + sFileSize);
+            chatViewController.addNewMessageIntoTextArea("You receive a file from another user, its size is "+ sFileSize + " b");
+
             long fileSize = Long.parseLong(sFileSize);
             byte[] buffer = new byte[4 * 1024];
             int bytesRead;
@@ -116,7 +117,7 @@ public class ClientConnection extends Thread {
 
             fileOutputStream.flush();
             fileOutputStream.close();
-            System.out.println("Saved at: " + folderPath + fileName);
+            chatViewController.addNewMessageIntoTextArea("File saved at: "+ folderPath + fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
