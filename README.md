@@ -1,4 +1,6 @@
 # ChatApp
+**The program for the client with a graphical interface is located in the main branch, while the server-side of the chat is located in the ChatAppServer branch.**
+
 This program is a pet project that offers an immersive online communication experience. By using socket programming principles, we ensure fast and seamless message transmission, file sharing, and private messaging. The user-friendly graphical interface makes the chat convenient for all clients.
 
 ## Features
